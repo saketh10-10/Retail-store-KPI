@@ -9,6 +9,8 @@ const database = require('./database/connection');
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const billingRoutes = require('./routes/billing');
+const trendingRoutes = require('./routes/trending');
+const managerSettingsRoutes = require('./routes/managerSettings');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -21,53 +23,106 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rule-based product recommendation system
-const getProductRecommendations = (currentWeather, forecast) => {
+// Rule-based product recommendation system - recommends both inventory products and general necessary items
+const getProductRecommendations = async (currentWeather, forecast) => {
   const condition = currentWeather.weather[0].main.toLowerCase();
   const temp = currentWeather.main.temp;
   const humidity = currentWeather.main.humidity;
+  
+  // Fetch all products from database
+  let allProducts = [];
+  try {
+    allProducts = await database.all('SELECT name, category, price, stock_quantity FROM products WHERE stock_quantity > 0');
+  } catch (error) {
+    console.error('Error fetching products:', error);
+  }
+  
+  // Helper function to find products by keywords and add general recommendations
+  const findProductsByKeywords = (keywords, generalItems, excludeList = []) => {
+    const found = [];
+    
+    // First, find matching products from inventory
+    for (const keyword of keywords) {
+      const matches = allProducts.filter(p => 
+        p.name.toLowerCase().includes(keyword.toLowerCase()) ||
+        p.category.toLowerCase().includes(keyword.toLowerCase())
+      );
+      found.push(...matches);
+    }
+    
+    // Get unique inventory products
+    const uniqueProducts = [...new Map(found.map(p => [p.name, p])).values()];
+    const inventoryProducts = uniqueProducts.map(p => p.name);
+    
+    // Combine with general necessary items (avoid duplicates)
+    const combined = [...inventoryProducts];
+    for (const item of generalItems) {
+      if (!combined.some(p => p.toLowerCase().includes(item.toLowerCase()) || item.toLowerCase().includes(p.toLowerCase()))) {
+        combined.push(item);
+      }
+    }
+    
+    // Filter out items already in excludeList
+    const filtered = combined.filter(item => 
+      !excludeList.some(excluded => 
+        item.toLowerCase() === excluded.toLowerCase() ||
+        item.toLowerCase().includes(excluded.toLowerCase()) ||
+        excluded.toLowerCase().includes(item.toLowerCase())
+      )
+    );
+    
+    return filtered.slice(0, 8); // Limit to 8 total recommendations
+  };
   
   let immediate = [];
   let upcoming = [];
   let seasonal = [];
   
-  // Current weather recommendations
+  // Current weather recommendations - ONLY general weather-based products (no inventory)
   if (condition.includes('rain') || condition.includes('drizzle')) {
     immediate = ['Umbrellas', 'Raincoats', 'Waterproof Boots', 'Rain Ponchos', 'Waterproof Bags'];
   } else if (condition.includes('snow')) {
     immediate = ['Winter Coats', 'Snow Boots', 'Gloves', 'Scarves', 'Hand Warmers', 'Ice Scrapers'];
   } else if (condition.includes('clear') && temp > 25) {
-    immediate = ['Sunglasses', 'Sunscreen', 'Hats', 'Cold Beverages', 'Fans', 'Light Clothing'];
+    immediate = ['Sunglasses', 'Sunscreen', 'Hats', 'Cold Beverages', 'Fans', 'Ice Cream'];
   } else if (temp < 10) {
-    immediate = ['Warm Clothing', 'Hot Beverages', 'Heaters', 'Blankets'];
+    immediate = ['Warm Clothing', 'Hot Beverages', 'Heaters', 'Blankets', 'Thermal Wear'];
   } else if (humidity > 70) {
-    immediate = ['Dehumidifiers', 'Anti-fungal Products', 'Moisture Absorbers'];
+    immediate = ['Dehumidifiers', 'Anti-fungal Products', 'Moisture Absorbers', 'Personal Care Items'];
   } else {
-    immediate = ['Seasonal Essentials', 'Daily Necessities'];
+    // Default: recommend popular categories
+    immediate = ['Fresh Produce', 'Dairy Products', 'Bakery Items', 'Beverages', 'Snacks'];
   }
   
-  // Forecast-based upcoming recommendations
+  // Forecast-based upcoming recommendations - Hybrid (inventory + general products)
   const upcomingConditions = forecast.list.slice(0, 8).map(item => item.weather[0].main.toLowerCase());
   const avgTemp = forecast.list.slice(0, 8).reduce((sum, item) => sum + item.main.temp, 0) / 8;
   
   if (upcomingConditions.some(cond => cond.includes('rain'))) {
-    upcoming = ['Stock up on Rain Gear', 'Waterproof Electronics', 'Indoor Entertainment'];
+    const generalUpcomingRain = ['Rain Gear', 'Indoor Entertainment', 'Comfort Food', 'Hot Beverages'];
+    upcoming = findProductsByKeywords(['rain', 'waterproof', 'indoor', 'entertainment', 'food', 'snack', 'hot'], generalUpcomingRain);
   } else if (upcomingConditions.some(cond => cond.includes('snow'))) {
-    upcoming = ['Winter Emergency Kits', 'Snow Removal Tools', 'Warm Food Items'];
+    const generalUpcomingSnow = ['Winter Emergency Kits', 'Snow Removal Tools', 'Warm Food Items', 'Batteries'];
+    upcoming = findProductsByKeywords(['winter', 'warm', 'food', 'hot', 'emergency', 'battery'], generalUpcomingSnow);
   } else if (avgTemp > 25) {
-    upcoming = ['Summer Essentials', 'Cooling Products', 'Outdoor Gear'];
+    const generalUpcomingSummer = ['Summer Essentials', 'Cooling Products', 'Outdoor Gear', 'Sunscreen'];
+    upcoming = findProductsByKeywords(['summer', 'cool', 'outdoor', 'beverage', 'drink', 'sunglasses', 'sunscreen'], generalUpcomingSummer);
   }
   
-  // Seasonal recommendations based on month
+  // Seasonal recommendations based on month - Hybrid (inventory + general products)
   const month = new Date().getMonth();
   if (month >= 2 && month <= 4) { // Spring
-    seasonal = ['Gardening Supplies', 'Spring Cleaning Products', 'Allergy Medications'];
+    const generalSpring = ['Gardening Supplies', 'Spring Cleaning Products', 'Allergy Medications', 'Light Clothing'];
+    seasonal = findProductsByKeywords(['garden', 'spring', 'cleaning', 'soap', 'shampoo', 'personal care', 'allergy'], generalSpring);
   } else if (month >= 5 && month <= 7) { // Summer
-    seasonal = ['Beach Accessories', 'BBQ Supplies', 'Air Conditioners'];
+    const generalSummer = ['Beach Accessories', 'BBQ Supplies', 'Air Conditioners', 'Sunscreen', 'Swimwear'];
+    seasonal = findProductsByKeywords(['beach', 'bbq', 'summer', 'sunglasses', 'beverage', 'accessories', 'swim'], generalSummer);
   } else if (month >= 8 && month <= 10) { // Fall
-    seasonal = ['Back-to-School Items', 'Warm Clothing', 'Halloween Decorations'];
+    const generalFall = ['Back-to-School Items', 'Warm Clothing', 'Halloween Decorations', 'Comfort Food'];
+    seasonal = findProductsByKeywords(['school', 'warm', 'clothing', 'accessories', 'halloween', 'comfort'], generalFall);
   } else { // Winter
-    seasonal = ['Holiday Decorations', 'Winter Sports Gear', 'Warm Beverages'];
+    const generalWinter = ['Holiday Decorations', 'Winter Sports Gear', 'Warm Beverages', 'Gift Items'];
+    seasonal = findProductsByKeywords(['holiday', 'winter', 'warm', 'beverage', 'food', 'gift', 'decoration'], generalWinter);
   }
   
   return { immediate, upcoming, seasonal };
@@ -164,7 +219,7 @@ app.get('/api/location', async (req, res) => {
     });
 
     // Generate rule-based recommendations
-    const recommendedProducts = getProductRecommendations(weather, forecast);
+    const recommendedProducts = await getProductRecommendations(weather, forecast);
     const insights = generateInsights(weather, forecast);
 
     res.json({
@@ -189,6 +244,8 @@ app.get('/api/location', async (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/billing', billingRoutes);
+app.use('/api/trending', trendingRoutes);
+app.use('/api/manager/settings', managerSettingsRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -214,7 +271,9 @@ const startServer = async () => {
       console.log(`🔐 Authentication: http://localhost:${PORT}/api/auth`);
       console.log(`📦 Products: http://localhost:${PORT}/api/products`);
       console.log(`💰 Billing: http://localhost:${PORT}/api/billing`);
-      console.log(`❤️ Health Check: http://localhost:${PORT}/api/health`);
+      console.log(`🔥 Trending: http://localhost:${PORT}/api/trending`);
+      console.log(`⚙️  Manager Settings: http://localhost:${PORT}/api/manager/settings`);
+      console.log(`❤️  Health Check: http://localhost:${PORT}/api/health`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

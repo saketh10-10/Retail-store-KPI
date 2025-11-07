@@ -1,0 +1,119 @@
+[
+  {
+    "id": 1,
+    "name": "Soap Bar",
+    "description": "Premium soap bar",
+    "price": 2.5,
+    "stock_quantity": 9,
+    "category": "Personal Care",
+    "sku": "SOAP001",
+    "min_stock_threshold": 20,
+    "updated_at": "2025-11-07T08:12:32.096Z"
+  },
+  {
+    "id": 2,
+    "name": "Soft Drink",
+    "description": "Carbonated soft drink",
+    "price": 1.25,
+    "stock_quantity": 197,
+    "category": "Beverages",
+    "sku": "DRINK001",
+    "min_stock_threshold": 50
+  },
+  {
+    "id": 3,
+    "name": "Soda Water",
+    "description": "Sparkling water",
+    "price": 1,
+    "stock_quantity": 150,
+    "category": "Beverages",
+    "sku": "SODA001",
+    "min_stock_threshold": 30
+  },
+  {
+    "id": 4,
+    "name": "Socks",
+    "description": "Cotton socks",
+    "price": 5,
+    "stock_quantity": 50,
+    "category": "Clothing",
+    "sku": "SOCK001",
+    "min_stock_threshold": 15
+  },
+  {
+    "id": 5,
+    "name": "Sunglasses",
+    "description": "UV protection sunglasses",
+    "price": 15,
+    "stock_quantity": 30,
+    "category": "Accessories",
+    "sku": "SUN001",
+    "min_stock_threshold": 10
+  },
+  {
+    "id": 6,
+    "name": "Shampoo",
+    "description": "Hair shampoo 250ml",
+    "price": 8.5,
+    "stock_quantity": 75,
+    "category": "Personal Care",
+    "sku": "SHAM001",
+    "min_stock_threshold": 25
+  },
+  {
+    "id": 7,
+    "name": "Sandwich",
+    "description": "Fresh sandwich",
+    "price": 4.5,
+    "stock_quantity": 25,
+    "category": "Food",
+    "sku": "SAND001",
+    "batch_no": "BATCH007",
+    "manufacturing_date": "2024-10-25",
+    "expiry_date": "2025-12-05",
+    "min_stock_threshold": 10,
+    "updated_at": "2025-11-07T06:35:43.936Z"
+  },
+  {
+    "id": 8,
+    "name": "Milk",
+    "description": "Fresh milk 1L",
+    "price": 3.2,
+    "stock_quantity": 120,
+    "category": "Dairy",
+    "sku": "MILK001",
+    "batch_no": "BATCH008",
+    "manufacturing_date": "2024-10-20",
+    "expiry_date": "2025-11-07",
+    "min_stock_threshold": 40,
+    "updated_at": "2025-11-07T06:36:08.399Z"
+  },
+  {
+    "id": 9,
+    "name": "Bread",
+    "description": "White bread loaf",
+    "price": 2.8,
+    "stock_quantity": 90,
+    "category": "Bakery",
+    "sku": "BREAD001",
+    "batch_no": "BATCH009",
+    "manufacturing_date": "2024-10-24",
+    "expiry_date": "2025-11-07",
+    "min_stock_threshold": 20,
+    "updated_at": "2025-11-07T06:36:20.204Z"
+  },
+  {
+    "id": 10,
+    "name": "Butter",
+    "description": "Salted butter 200g",
+    "price": 4,
+    "stock_quantity": 60,
+    "category": "Dairy",
+    "sku": "BUTT001",
+    "batch_no": "BATCH010",
+    "manufacturing_date": "2024-09-01",
+    "expiry_date": "2025-11-07",
+    "min_stock_threshold": 15,
+    "updated_at": "2025-11-07T06:37:03.276Z"
+  }
+]

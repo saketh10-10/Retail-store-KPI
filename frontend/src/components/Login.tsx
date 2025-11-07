@@ -1,24 +1,55 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { managerSettingsAPI } from '../utils/api';
 import styles from './Login.module.css';
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
 
+  // Check if username is a manager account
+  const isManagerUsername = username.toLowerCase() === 'admin' || username.toLowerCase().includes('manager');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    // Validate email for managers
+    if (isManagerUsername && !email) {
+      setError('Please enter your email address');
+      return;
+    }
+
+    if (isManagerUsername && email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        setError('Please enter a valid email address');
+        return;
+      }
+    }
+
     setIsLoading(true);
 
     try {
-      await login(username, password);
+      const response = await login(username, password);
+      
+      // If user is a manager, save their email
+      if (response?.user?.role === 'manager' && email) {
+        try {
+          await managerSettingsAPI.saveSettings(email, true);
+        } catch (error) {
+          console.error('Failed to save email:', error);
+          // Continue anyway, email can be configured later
+        }
+      }
+      
+      // Login successful, AuthContext will handle redirect
     } catch (error: any) {
       setError(error.message || 'Login failed');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -62,6 +93,24 @@ const Login: React.FC = () => {
               disabled={isLoading}
             />
           </div>
+
+          {isManagerUsername && (
+            <div className={styles.inputGroup}>
+              <label htmlFor="email">Email Address (for stock alerts)</label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email address"
+                required
+                disabled={isLoading}
+              />
+              <small className={styles.hint}>
+                Enter any valid email - you'll receive low stock alerts when products fall below 10 units
+              </small>
+            </div>
+          )}
 
           {error && <div className={styles.error}>{error}</div>}
 

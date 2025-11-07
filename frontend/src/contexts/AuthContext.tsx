@@ -11,7 +11,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<{ user: User; token: string }>;
   logout: () => Promise<void>;
   isManager: boolean;
 }
@@ -57,6 +57,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await authAPI.login(username, password);
       setUser(response.user);
+      return response;
     } catch (error) {
       throw error;
     }

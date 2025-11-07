@@ -38,8 +38,10 @@ const initDatabase = () => {
           description TEXT,
           price DECIMAL(10,2) NOT NULL,
           stock_quantity INTEGER DEFAULT 0,
+          min_stock_threshold INTEGER DEFAULT 10,
           category TEXT,
           sku TEXT UNIQUE,
+          view_count INTEGER DEFAULT 0,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
@@ -70,6 +72,19 @@ const initDatabase = () => {
           total_price DECIMAL(10,2) NOT NULL,
           FOREIGN KEY (bill_id) REFERENCES bills (id) ON DELETE CASCADE,
           FOREIGN KEY (product_id) REFERENCES products (id)
+        )
+      `);
+
+      // Manager settings table
+      db.run(`
+        CREATE TABLE IF NOT EXISTS manager_settings (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER NOT NULL UNIQUE,
+          notification_email TEXT NOT NULL,
+          enable_low_stock_alerts INTEGER DEFAULT 1,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users (id)
         )
       `);
 

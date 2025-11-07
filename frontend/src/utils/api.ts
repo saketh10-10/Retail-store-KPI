@@ -178,6 +178,64 @@ export const billingAPI = {
   },
 };
 
+// Trending Products API
+export const trendingAPI = {
+  getTrending: async (params: {
+    filter?: 'most_purchased' | 'fastest_selling' | 'highest_revenue' | 'recently_added';
+    limit?: number;
+    days?: number;
+    category?: string;
+  } = {}) => {
+    const queryString = new URLSearchParams(
+      Object.entries(params)
+        .filter(([_, value]) => value !== undefined)
+        .map(([key, value]) => [key, String(value)])
+    ).toString();
+    
+    return await apiRequest(`/trending?${queryString}`);
+  },
+
+  getCategories: async (params: { days?: number } = {}) => {
+    const queryString = new URLSearchParams(
+      Object.entries(params)
+        .filter(([_, value]) => value !== undefined)
+        .map(([key, value]) => [key, String(value)])
+    ).toString();
+    
+    return await apiRequest(`/trending/categories?${queryString}`);
+  },
+};
+
+// Manager Settings API
+export const managerSettingsAPI = {
+  getSettings: async () => {
+    return await apiRequest('/manager/settings');
+  },
+
+  saveSettings: async (email: string, enableAlerts: boolean = true) => {
+    return await apiRequest('/manager/settings', {
+      method: 'POST',
+      body: JSON.stringify({
+        notification_email: email,
+        enable_low_stock_alerts: enableAlerts,
+      }),
+    });
+  },
+
+  sendTestEmail: async () => {
+    return await apiRequest('/manager/settings/test-email', {
+      method: 'POST',
+    });
+  },
+
+  toggleAlerts: async (enable: boolean) => {
+    return await apiRequest('/manager/settings/toggle-alerts', {
+      method: 'PATCH',
+      body: JSON.stringify({ enable }),
+    });
+  },
+};
+
 // Health check
 export const healthAPI = {
   check: async () => {

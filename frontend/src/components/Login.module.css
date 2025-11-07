@@ -9,19 +9,63 @@
 
 .loginCard {
   background: white;
-  border-radius: 12px;
   padding: 40px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   width: 100%;
   max-width: 400px;
 }
 
 .title {
-  text-align: center;
-  margin-bottom: 30px;
-  color: #333;
   font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 10px 0;
+  text-align: center;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  text-align: center;
+  margin: 0 0 30px 0;
+  line-height: 1.5;
+}
+
+.hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skipButton {
+  width: 100%;
+  padding: 12px;
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 16px;
   font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.skipButton:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
+.skipButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .form {

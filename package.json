@@ -2,6 +2,10 @@
   "name": "retail-kpi-fullstack",
   "version": "1.0.0",
   "scripts": {
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm start",
+    "dev": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
     "build": "cd frontend && npm install --legacy-peer-deps && npm run build",
     "install-frontend": "cd frontend && npm install --legacy-peer-deps",
     "install-backend": "cd backend && npm install"
@@ -15,5 +19,8 @@
     "jsonwebtoken": "^9.0.2",
     "sqlite3": "^5.1.6",
     "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { productsAPI } from '../utils/api';
-import styles from './ProductsPage.module.css';
+import styles from './DashBoard.module.css';
+import productStyles from './ProductsPage.module.css';
 
 interface Product {
   id: number;
@@ -10,6 +11,9 @@ interface Product {
   stock_quantity: number;
   category: string;
   sku: string;
+  batch_no?: string;
+  manufacturing_date?: string;
+  expiry_date?: string;
   created_at: string;
   updated_at: string;
 }
@@ -21,6 +25,9 @@ interface ProductForm {
   stock_quantity: string;
   category: string;
   sku: string;
+  batch_no: string;
+  manufacturing_date: string;
+  expiry_date: string;
 }
 
 const ProductsPage: React.FC = () => {
@@ -34,13 +41,20 @@ const ProductsPage: React.FC = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   
+  // Perishable categories that need expiry dates
+  const perishableCategories = ['Food', 'Dairy', 'Bakery'];
+  const isPerishable = (category: string) => perishableCategories.includes(category);
+  
   const [formData, setFormData] = useState<ProductForm>({
     name: '',
     description: '',
     price: '',
     stock_quantity: '',
     category: '',
-    sku: ''
+    sku: '',
+    batch_no: '',
+    manufacturing_date: '',
+    expiry_date: ''
   });
 
   useEffect(() => {
@@ -80,7 +94,10 @@ const ProductsPage: React.FC = () => {
       price: '',
       stock_quantity: '',
       category: '',
-      sku: ''
+      sku: '',
+      batch_no: '',
+      manufacturing_date: '',
+      expiry_date: ''
     });
     setEditingProduct(null);
     setShowAddForm(false);
@@ -103,7 +120,10 @@ const ProductsPage: React.FC = () => {
         price: parseFloat(formData.price),
         stock_quantity: parseInt(formData.stock_quantity) || 0,
         category: formData.category || undefined,
-        sku: formData.sku || undefined
+        sku: formData.sku || undefined,
+        batch_no: formData.batch_no || undefined,
+        manufacturing_date: formData.manufacturing_date || undefined,
+        expiry_date: formData.expiry_date || undefined
       };
 
       if (editingProduct) {
@@ -129,7 +149,10 @@ const ProductsPage: React.FC = () => {
       price: product.price.toString(),
       stock_quantity: product.stock_quantity.toString(),
       category: product.category || '',
-      sku: product.sku || ''
+      sku: product.sku || '',
+      batch_no: product.batch_no || '',
+      manufacturing_date: product.manufacturing_date || '',
+      expiry_date: product.expiry_date || ''
     });
     setEditingProduct(product);
     setShowAddForm(true);
@@ -150,10 +173,10 @@ const ProductsPage: React.FC = () => {
   };
 
   return (
-    <div className={styles.productsPage}>
+    <div className={styles.dashboard}>
       <div className={styles.header}>
         <div>
-          <h1>Product Management</h1>
+          <h1>📦 Product Management</h1>
           <p>Manage your inventory and product catalog</p>
         </div>
         <button
@@ -165,21 +188,21 @@ const ProductsPage: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className={styles.filters}>
-        <div className={styles.searchContainer}>
+      <div className={productStyles.filters}>
+        <div className={productStyles.searchContainer}>
           <input
             type="text"
             placeholder="Search products..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={styles.searchInput}
+            className={productStyles.searchInput}
           />
         </div>
         
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className={styles.categorySelect}
+          className={productStyles.categorySelect}
         >
           <option value="">All Categories</option>
           {categories.map(category => (
@@ -190,16 +213,16 @@ const ProductsPage: React.FC = () => {
 
       {/* Add/Edit Form Modal */}
       {showAddForm && (
-        <div className={styles.modal}>
-          <div className={styles.modalContent}>
-            <div className={styles.modalHeader}>
+        <div className={productStyles.modal}>
+          <div className={productStyles.modalContent}>
+            <div className={productStyles.modalHeader}>
               <h2>{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
-              <button onClick={resetForm} className={styles.closeButton}>×</button>
+              <button onClick={resetForm} className={productStyles.closeButton}>×</button>
             </div>
             
-            <form onSubmit={handleSubmit} className={styles.form}>
-              <div className={styles.formRow}>
-                <div className={styles.inputGroup}>
+            <form onSubmit={handleSubmit} className={productStyles.form}>
+              <div className={productStyles.formRow}>
+                <div className={productStyles.inputGroup}>
                   <label>Product Name *</label>
                   <input
                     type="text"
@@ -210,7 +233,7 @@ const ProductsPage: React.FC = () => {
                   />
                 </div>
                 
-                <div className={styles.inputGroup}>
+                <div className={productStyles.inputGroup}>
                   <label>SKU</label>
                   <input
                     type="text"
@@ -222,7 +245,7 @@ const ProductsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className={styles.inputGroup}>
+              <div className={productStyles.inputGroup}>
                 <label>Description</label>
                 <textarea
                   name="description"
@@ -232,8 +255,8 @@ const ProductsPage: React.FC = () => {
                 />
               </div>
 
-              <div className={styles.formRow}>
-                <div className={styles.inputGroup}>
+              <div className={productStyles.formRow}>
+                <div className={productStyles.inputGroup}>
                   <label>Price *</label>
                   <input
                     type="number"
@@ -246,7 +269,7 @@ const ProductsPage: React.FC = () => {
                   />
                 </div>
                 
-                <div className={styles.inputGroup}>
+                <div className={productStyles.inputGroup}>
                   <label>Stock Quantity</label>
                   <input
                     type="number"
@@ -258,7 +281,7 @@ const ProductsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className={styles.inputGroup}>
+              <div className={productStyles.inputGroup}>
                 <label>Category</label>
                 <input
                   type="text"
@@ -269,11 +292,54 @@ const ProductsPage: React.FC = () => {
                 />
               </div>
 
-              <div className={styles.formActions}>
-                <button type="button" onClick={resetForm} className={styles.cancelButton}>
+              {isPerishable(formData.category) && (
+                <>
+                  <div className={productStyles.formRow}>
+                    <div className={productStyles.inputGroup}>
+                      <label>Batch Number</label>
+                      <input
+                        type="text"
+                        name="batch_no"
+                        value={formData.batch_no}
+                        onChange={handleInputChange}
+                        placeholder="e.g., BATCH001"
+                      />
+                    </div>
+                  </div>
+
+                  <div className={productStyles.formRow}>
+                    <div className={productStyles.inputGroup}>
+                      <label>Manufacturing Date</label>
+                      <input
+                        type="date"
+                        name="manufacturing_date"
+                        value={formData.manufacturing_date}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    
+                    <div className={productStyles.inputGroup}>
+                      <label>Expiry Date</label>
+                      <input
+                        type="date"
+                        name="expiry_date"
+                        value={formData.expiry_date}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className={productStyles.infoMessage}>
+                    ℹ️ Expiry tracking enabled for perishable items (Food, Dairy, Bakery)
+                  </div>
+                </>
+              )}
+
+              <div className={productStyles.formActions}>
+                <button type="button" onClick={resetForm} className={productStyles.cancelButton}>
                   Cancel
                 </button>
-                <button type="submit" className={styles.saveButton}>
+                <button type="submit" className={productStyles.saveButton}>
                   {editingProduct ? 'Update Product' : 'Create Product'}
                 </button>
               </div>
@@ -283,32 +349,32 @@ const ProductsPage: React.FC = () => {
       )}
 
       {/* Products List */}
-      <div className={styles.productsContainer}>
-        {error && <div className={styles.error}>{error}</div>}
-        {success && <div className={styles.success}>{success}</div>}
+      <div className={productStyles.productsContainer}>
+        {error && <div className={productStyles.error}>{error}</div>}
+        {success && <div className={productStyles.success}>{success}</div>}
 
         {isLoading ? (
-          <div className={styles.loading}>Loading products...</div>
+          <div className={productStyles.loading}>Loading products...</div>
         ) : products.length === 0 ? (
-          <div className={styles.emptyState}>
+          <div className={productStyles.emptyState}>
             <p>No products found. {searchQuery || selectedCategory ? 'Try adjusting your filters.' : 'Add your first product to get started.'}</p>
           </div>
         ) : (
-          <div className={styles.productsGrid}>
+          <div className={productStyles.productsGrid}>
             {products.map(product => (
-              <div key={product.id} className={styles.productCard}>
-                <div className={styles.productHeader}>
+              <div key={product.id} className={productStyles.productCard}>
+                <div className={productStyles.productHeader}>
                   <h3>{product.name}</h3>
-                  <div className={styles.productActions}>
+                  <div className={productStyles.productActions}>
                     <button
                       onClick={() => handleEdit(product)}
-                      className={styles.editButton}
+                      className={productStyles.editButton}
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDelete(product)}
-                      className={styles.deleteButton}
+                      className={productStyles.deleteButton}
                     >
                       Delete
                     </button>
@@ -316,23 +382,39 @@ const ProductsPage: React.FC = () => {
                 </div>
                 
                 {product.description && (
-                  <p className={styles.productDescription}>{product.description}</p>
+                  <p className={productStyles.productDescription}>{product.description}</p>
                 )}
                 
-                <div className={styles.productDetails}>
-                  <div className={styles.priceStock}>
-                    <span className={styles.price}>${product.price.toFixed(2)}</span>
-                    <span className={`${styles.stock} ${product.stock_quantity < 10 ? styles.lowStock : ''}`}>
+                <div className={productStyles.productDetails}>
+                  <div className={productStyles.priceStock}>
+                    <span className={productStyles.price}>₹{product.price.toFixed(2)}</span>
+                    <span className={`${productStyles.stock} ${product.stock_quantity < 10 ? productStyles.lowStock : ''}`}>
                       Stock: {product.stock_quantity}
                     </span>
                   </div>
                   
                   {product.category && (
-                    <span className={styles.category}>{product.category}</span>
+                    <span className={productStyles.category}>{product.category}</span>
                   )}
                   
                   {product.sku && (
-                    <span className={styles.sku}>SKU: {product.sku}</span>
+                    <span className={productStyles.sku}>SKU: {product.sku}</span>
+                  )}
+                  
+                  {product.batch_no && (
+                    <span className={productStyles.batch}>Batch: {product.batch_no}</span>
+                  )}
+                  
+                  {product.expiry_date && (
+                    <span className={productStyles.expiry}>
+                      Expires: {new Date(product.expiry_date).toLocaleDateString()}
+                    </span>
+                  )}
+                  
+                  {product.manufacturing_date && (
+                    <span className={productStyles.mfgDate}>
+                      Mfg: {new Date(product.manufacturing_date).toLocaleDateString()}
+                    </span>
                   )}
                 </div>
               </div>

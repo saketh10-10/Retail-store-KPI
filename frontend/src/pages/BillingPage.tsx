@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { productsAPI, billingAPI } from '../utils/api';
-import styles from './BillingPage.module.css';
+import styles from './DashBoard.module.css';
+import billingStyles from './BillingPage.module.css';
 
 interface Product {
   id: number;
@@ -140,13 +141,12 @@ const BillingPage: React.FC = () => {
   };
 
   return (
-    <div className={styles.billingPage}>
+    <div className={styles.dashboard}>
       <div className={styles.header}>
-        <h1>Create New Bill</h1>
-        <p>Search for products and add them to the bill</p>
+        <h1>💰 Create New Bill</h1>
       </div>
 
-      <div className={styles.content}>
+      <div className={billingStyles.content}>
         <div className={styles.productSearch}>
           <h2>Add Products</h2>
           <div className={styles.searchContainer}>
@@ -168,7 +168,7 @@ const BillingPage: React.FC = () => {
                   >
                     <div className={styles.productInfo}>
                       <span className={styles.productName}>{product.name}</span>
-                      <span className={styles.productPrice}>${product.price.toFixed(2)}</span>
+                      <span className={styles.productPrice}>₹{product.price.toFixed(2)}</span>
                     </div>
                     <span className={styles.productStock}>Stock: {product.stock}</span>
                   </div>
@@ -198,7 +198,7 @@ const BillingPage: React.FC = () => {
                 <div key={item.product_id} className={styles.billItem}>
                   <div className={styles.itemInfo}>
                     <span className={styles.itemName}>{item.product_name}</span>
-                    <span className={styles.itemPrice}>${item.price.toFixed(2)} each</span>
+                    <span className={styles.itemPrice}>₹{item.price.toFixed(2)} each</span>
                   </div>
                   
                   <div className={styles.quantityControls}>
@@ -208,7 +208,16 @@ const BillingPage: React.FC = () => {
                     >
                       -
                     </button>
-                    <span className={styles.quantity}>{item.quantity}</span>
+                    <input
+                      type="number"
+                      min="1"
+                      value={item.quantity}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value) || 1;
+                        updateQuantity(item.product_id, value);
+                      }}
+                      className={styles.quantityInput}
+                    />
                     <button
                       onClick={() => updateQuantity(item.product_id, item.quantity + 1)}
                       className={styles.quantityButton}
@@ -218,7 +227,7 @@ const BillingPage: React.FC = () => {
                   </div>
                   
                   <div className={styles.itemTotal}>
-                    ${item.total.toFixed(2)}
+                    ₹{item.total.toFixed(2)}
                   </div>
                   
                   <button
@@ -236,7 +245,7 @@ const BillingPage: React.FC = () => {
             <div className={styles.billFooter}>
               <div className={styles.totalSection}>
                 <div className={styles.totalAmount}>
-                  Total: ${getTotalAmount().toFixed(2)}
+                  Total: ₹{getTotalAmount().toFixed(2)}
                 </div>
                 
                 <button

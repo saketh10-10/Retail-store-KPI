@@ -25,34 +25,54 @@ const Navigation: React.FC = () => {
         </div>
 
         <div className={styles.navLinks}>
-          <Link 
-            to="/" 
-            className={`${styles.navLink} ${isActive('/') ? styles.active : ''}`}
-          >
-            Dashboard
-          </Link>
-          
-          <Link 
-            to="/location" 
-            className={`${styles.navLink} ${isActive('/location') ? styles.active : ''}`}
-          >
-            Weather Intel
-          </Link>
-          
-          <Link 
-            to="/billing" 
-            className={`${styles.navLink} ${isActive('/billing') ? styles.active : ''}`}
-          >
-            Billing
-          </Link>
-          
-          {isManager && (
+          {/* Cashiers only see Billing */}
+          {!isManager && (
             <Link 
-              to="/products" 
-              className={`${styles.navLink} ${isActive('/products') ? styles.active : ''}`}
+              to="/billing" 
+              className={`${styles.navLink} ${isActive('/billing') ? styles.active : ''}`}
             >
-              Products
+              Billing
             </Link>
+          )}
+          
+          {/* Managers see all pages */}
+          {isManager && (
+            <>
+              <Link 
+                to="/" 
+                className={`${styles.navLink} ${isActive('/') ? styles.active : ''}`}
+              >
+                Dashboard
+              </Link>
+              
+              <Link 
+                to="/location" 
+                className={`${styles.navLink} ${isActive('/location') ? styles.active : ''}`}
+              >
+                Weather Intel
+              </Link>
+              
+              <Link 
+                to="/trending" 
+                className={`${styles.navLink} ${isActive('/trending') ? styles.active : ''}`}
+              >
+                🔥 Trending
+              </Link>
+              
+              <Link 
+                to="/billing" 
+                className={`${styles.navLink} ${isActive('/billing') ? styles.active : ''}`}
+              >
+                Billing
+              </Link>
+              
+              <Link 
+                to="/products" 
+                className={`${styles.navLink} ${isActive('/products') ? styles.active : ''}`}
+              >
+                Products
+              </Link>
+            </>
           )}
         </div>
 
