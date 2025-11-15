@@ -7,16 +7,12 @@ const path = require('path');
 const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
 const dbPath = isServerless ? ':memory:' : path.join(__dirname, 'retail_kpi.db');
 
-const initDatabase = () => {
+const initDatabase = (db) => {
   return new Promise((resolve, reject) => {
-    const db = new sqlite3.Database(dbPath, (err) => {
-      if (err) {
-        console.error('Error opening database:', err.message);
-        reject(err);
-        return;
-      }
-      console.log('Connected to SQLite database');
-    });
+    if (!db) {
+      reject(new Error('Database connection required'));
+      return;
+    }
 
     // Create tables
     db.serialize(() => {
@@ -146,16 +142,17 @@ const initDatabase = () => {
           [product.name, product.description, product.price, product.stock, product.category, product.sku]
         );
       });
-    });
-
-    db.close((err) => {
-      if (err) {
-        console.error('Error closing database:', err.message);
-        reject(err);
-      } else {
-        console.log('Database initialized successfully');
-        resolve();
-      }
+      
+      // Wait for all operations to complete
+      db.get('SELECT 1', (err) => {
+        if (err) {
+          console.error('Database initialization error:', err);
+          reject(err);
+        } else {
+          console.log('Database initialized successfully');
+          resolve();
+        }
+      });
     });
   });
 };

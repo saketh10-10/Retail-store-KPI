@@ -10,8 +10,8 @@ const handler = async (req, res) => {
   // Initialize database if not already done
   if (!dbInitialized) {
     try {
-      await initDatabase();
       await database.connect();
+      await initDatabase(database.db);
       dbInitialized = true;
       console.log('Database initialized successfully');
     } catch (error) {
