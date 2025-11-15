@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { productsAPI } from '../utils/api';
 import styles from './DashBoard.module.css';
 import productStyles from './ProductsPage.module.css';
@@ -57,12 +57,7 @@ const ProductsPage: React.FC = () => {
     expiry_date: ''
   });
 
-  useEffect(() => {
-    fetchProducts();
-    fetchCategories();
-  }, [searchQuery, selectedCategory]);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await productsAPI.getAll({
@@ -76,16 +71,21 @@ const ProductsPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [searchQuery, selectedCategory]);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const response = await productsAPI.getCategories();
       setCategories(response.categories);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchProducts();
+    fetchCategories();
+  }, [fetchProducts, fetchCategories]);
 
   const resetForm = () => {
     setFormData({

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { trendingAPI } from '../utils/api';
 import styles from './DashBoard.module.css';
 
@@ -36,24 +36,16 @@ const TrendingPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [categories, setCategories] = useState<string[]>([]);
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  useEffect(() => {
-    fetchTrendingProducts();
-  }, [filter, days, selectedCategory]);
-
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const response = await trendingAPI.getCategories();
       setCategories(response.categories.map((c: any) => c.category));
     } catch (error) {
       console.error('Failed to fetch categories:', error);
     }
-  };
+  }, []);
 
-  const fetchTrendingProducts = async () => {
+  const fetchTrendingProducts = useCallback(async () => {
     setIsLoading(true);
     setError('');
     
@@ -75,7 +67,15 @@ const TrendingPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [filter, days, selectedCategory]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  useEffect(() => {
+    fetchTrendingProducts();
+  }, [fetchTrendingProducts]);
 
   const formatCurrency = (amount: number) => {
     return `₹${amount.toFixed(2)}`;
