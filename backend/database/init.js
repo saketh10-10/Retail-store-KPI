@@ -2,7 +2,10 @@ const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcryptjs');
 const path = require('path');
 
-const dbPath = path.join(__dirname, 'retail_kpi.db');
+// Use in-memory database for serverless environments (Vercel)
+// Use file-based database for local development
+const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
+const dbPath = isServerless ? ':memory:' : path.join(__dirname, 'retail_kpi.db');
 
 const initDatabase = () => {
   return new Promise((resolve, reject) => {
